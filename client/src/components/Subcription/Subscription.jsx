@@ -1,19 +1,18 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import './Subscription.css'
 
 const Subcription = () => {
+  const navigate = useNavigate();
   return (
     <div>
       <div className='subscription-section'>
         <div className="subscription-heading">
-            <h1>Never Miss a Deal!</h1>
-            <p>Subcripbe and get daily updates and new collections notifications form us</p>
+            <h2>Find the right rental for your space</h2>
+            <p>Explore furniture and appliances with clear pricing, flexible terms, and refundable deposits.</p>
         </div>
         <div className="subscription-form">
-            <form>
-                <input type="text" placeholder='Type here' required/>
-                <button type='submit'>Subscribe</button>
-            </form>
+            <button type='button' onClick={() => navigate('/products')}>Browse rentals</button>
         </div>
       </div>
     </div>

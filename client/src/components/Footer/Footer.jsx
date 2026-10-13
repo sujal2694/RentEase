@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import './Footer.css'
 
 const Footer = () => {
@@ -6,41 +7,29 @@ const Footer = () => {
         <div>
             <div className="footer">
                 <div className='footer-head'>
-                    <h1>shop</h1>
-                    <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Enim, autem possimus exercitationem voluptatem, quasi impedit architecto ullam at repellendus voluptas porro nam illo amet cumque pariatur odio quis accusantium tempore.</p>
+                    <h2>RentEase</h2>
+                    <p>Flexible furniture and appliance rentals for the way you live. Choose a rental term, see every charge up front, and get delivery to your door.</p>
                 </div>
 
                 <div className="links">
                     <ul className="nav-links">
-                        <h1>Quick Links</h1>
-                        <li>Home</li>
-                        <li>About</li>
-                        <li>Products</li>
-                        <li>Contact Us</li>
+                        <h2>Quick Links</h2>
+                        <li><Link to="/">Home</Link></li>
+                        <li><Link to="/about">About</Link></li>
+                        <li><Link to="/products">Browse Rentals</Link></li>
+                        <li><Link to="/contact">Contact Us</Link></li>
                     </ul>
 
                     <ul className="social-links">
-                        <h1>Social Links</h1>
-                        <li className='facebook'>
-                            <i className='fab fa-facebook'></i>
-                            <p>Facebook</p>
-                        </li>
-                        <li className='youtube'>
-                            <i className='fab fa-youtube'></i>
-                            <p>YouTube</p>
-                        </li>
-                        <li className='twitter-x'>
-                            <i className='fab fa-x-twitter'></i>
-                            <p>X</p>
-                        </li>
-                        <li className='insta'>
-                            <i className='fab fa-instagram'></i>
-                            <p>Instagram</p>
-                        </li>
+                        <h2>Your Rentals</h2>
+                        <li><Link to="/products">Browse the catalog</Link></li>
+                        <li><Link to="/cart">Rental basket</Link></li>
+                        <li><Link to="/myorders">My bookings</Link></li>
+                        <li><Link to="/contact">Rental support</Link></li>
                     </ul>
                 </div>
             </div>
-            <p className='footer-text-para'>Copyright &copy;2025 Shop name, All Right Reserved.</p>
+            <p className='footer-text-para'>Copyright &copy;{new Date().getFullYear()} RentEase. All rights reserved.</p>
         </div>
     )
 }

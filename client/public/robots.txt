@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /cart
+Disallow: /placeorder
+Disallow: /myorders
+Disallow: /verify
+
+Sitemap: http://localhost:5174/sitemap.xml

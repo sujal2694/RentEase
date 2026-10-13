@@ -1,0 +1,91 @@
+.my-rentals {
+    width: min(1000px, 90vw);
+    min-height: 50vh;
+    margin: 30px auto 80px;
+}
+
+.my-rentals h1 {
+    margin-bottom: 24px;
+    font-size: 32px;
+}
+
+.booking-list {
+    display: grid;
+    gap: 18px;
+}
+
+.booking-card {
+    padding: 22px;
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px #0000000b;
+}
+
+.booking-card header,
+.booking-card li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.booking-card header {
+    margin-bottom: 15px;
+}
+
+.booking-card header h2 {
+    font-size: 18px;
+}
+
+.booking-card header p,
+.booking-card > p {
+    margin-top: 5px;
+    color: #666;
+    font-size: 13px;
+}
+
+.booking-status {
+    padding: 6px 10px;
+    border-radius: 50px;
+    background: #fff2d6;
+    color: #8b5a00;
+    font-size: 12px;
+}
+
+.booking-status.paid {
+    background: #e4f6eb;
+    color: #207143;
+}
+
+.booking-card ul {
+    list-style: none;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 12px;
+}
+
+.booking-card li {
+    padding: 10px 0;
+}
+
+.booking-card > strong {
+    display: block;
+    margin-top: 12px;
+    text-align: right;
+}
+
+.no-bookings {
+    padding: 70px 20px;
+    text-align: center;
+    color: #666;
+}
+
+.no-bookings button {
+    margin-top: 15px;
+    border: none;
+    border-radius: 7px;
+    padding: 11px 22px;
+    background: #222;
+    color: white;
+    cursor: pointer;
+}

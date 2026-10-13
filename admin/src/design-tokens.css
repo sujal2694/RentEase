@@ -1,0 +1,21 @@
+:root {
+  color-scheme: light;
+  --admin-ink: #273a44;
+  --admin-teal: #2e4450;
+  --admin-muted: #64747a;
+  --admin-accent: #a87343;
+  --admin-border: #e9e7e1;
+  --admin-paper: #fff;
+  --admin-bg: #f8f7f4;
+  --admin-space-1: 4px;
+  --admin-space-2: 8px;
+  --admin-space-3: 12px;
+  --admin-space-4: 16px;
+  --admin-space-5: 24px;
+  --admin-space-6: 32px;
+  --admin-radius-sm: 5px;
+  --admin-radius-md: 8px;
+  --admin-radius-lg: 12px;
+  --admin-shadow-card: 0 8px 26px rgb(39 58 68 / 5%);
+  --admin-focus-ring: 0 0 0 3px rgb(168 115 67 / 25%);
+}

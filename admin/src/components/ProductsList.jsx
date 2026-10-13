@@ -1,96 +1,122 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
+import toast from 'react-hot-toast'
+import { Link, useNavigate } from 'react-router-dom'
+import { DataSkeletons, EmptyState, Modal, PageHeader } from './AdminUI'
 
-const ProductsList = ({ url }) => {
-  const [productsList, setProductsList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const categoryName = value => String(value || '').toLowerCase().split(/[_\s-]+/).filter(Boolean).map(word => word[0].toUpperCase() + word.slice(1)).join(' ')
+const pageSize = 12
+const createdTime = product => {
+  const date = Date.parse(product.createdAt)
+  if (Number.isFinite(date)) return date
+  const objectIdPrefix = String(product._id || '').slice(0, 8)
+  return /^[\da-f]{8}$/i.test(objectIdPrefix) ? Number.parseInt(objectIdPrefix, 16) * 1000 : 0
+}
 
-  const fetchProducts = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${url}/api/product/list`);
-      if (response.data.success) {
-        setProductsList(response.data.data);
-        setError(null);
-      } else {
-        setError(response.data.message);
-        console.log(response.data.message);
-      }
-    } catch (err) {
-      setError('Failed to fetch products');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [url]);
+const ProductsList = ({ url, token, onApiError }) => {
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('all')
+  const [sort, setSort] = useState('newest')
+  const [visibleCount, setVisibleCount] = useState(pageSize)
+  const [refreshing, setRefreshing] = useState(false)
+  const [productToRemove, setProductToRemove] = useState(null)
+  const [removing, setRemoving] = useState(false)
+  const [imageReady, setImageReady] = useState({})
+  const navigate = useNavigate()
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts])
-  
-  if (loading) {
-    return <div className="text-center py-10 text-gray-500">Loading products...</div>;
-  }
+    const timer = window.setTimeout(() => setSearch(searchInput), 250)
+    return () => window.clearTimeout(timer)
+  }, [searchInput])
 
-  if (error) {
-    return <div className="text-center py-10 text-red-500">Error: {error}</div>;
-  }
+  const fetchProducts = useCallback(async (quiet = false) => {
+    if (!quiet) setLoading(true)
+    else setRefreshing(true)
+    try {
+      const response = await axios.get(`${url}/api/product/list`)
+      if (!response.data.success) throw new Error(response.data.message || 'Unable to load rental catalog')
+      setProducts(response.data.data)
+      setError('')
+    } catch (error) {
+      console.error('Unable to load rental catalog', error)
+      setError(error.response?.data?.message || error.message || 'Unable to load rental catalog')
+      onApiError(error, 'Unable to load rental catalog')
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }, [url, onApiError])
 
-  if (productsList.length === 0) {
-    return <div className="w-full h-full text-center text-3xl font-semibold py-10 text-gray-500">No products found</div>;
+  useEffect(() => { fetchProducts() }, [fetchProducts])
+
+  const categories = useMemo(() => [...new Set(products.map(product => product.category).filter(Boolean))].sort(), [products])
+  const filteredProducts = useMemo(() => products.filter(product => {
+    const matchesCategory = category === 'all' || product.category === category
+    const query = search.trim().toLowerCase()
+    const matchesSearch = !query || `${product.name} ${product.category} ${product.description || ''}`.toLowerCase().includes(query)
+    return matchesCategory && matchesSearch
+  }).sort((first, second) => {
+    if (sort === 'price-low') return (Number(first.monthlyRent) || 0) - (Number(second.monthlyRent) || 0)
+    if (sort === 'price-high') return (Number(second.monthlyRent) || 0) - (Number(first.monthlyRent) || 0)
+    if (sort === 'name') return first.name.localeCompare(second.name)
+    return createdTime(second) - createdTime(first)
+  }), [products, category, search, sort])
+
+  useEffect(() => { setVisibleCount(pageSize) }, [search, category, sort])
+
+  const removeProduct = async () => {
+    const product = productToRemove
+    if (!product) return
+    setRemoving(true)
+    try {
+      const response = await axios.post(`${url}/api/product/remove`, { id: product._id }, { headers: { token } })
+      if (!response.data.success) throw new Error(response.data.message || 'Unable to remove rental item')
+      setProducts(current => current.filter(item => item._id !== product._id))
+      toast.success('Rental item removed')
+      setProductToRemove(null)
+    } catch (error) {
+      console.error('Unable to remove rental item', error)
+      onApiError(error, 'Unable to remove rental item')
+    } finally {
+      setRemoving(false)
+    }
   }
+  const closeRemoveDialog = useCallback(() => setProductToRemove(null), [])
 
   return (
-    <div className="w-[60vw] p-5">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Products List</h2>
-      <div className="flex flex-col divide-y bg-white rounded-md">
-        {productsList.map((item, index) => {
-          return (
-            <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center p-4 gap-4">
-              <div className="relative w-full sm:w-28 h-44 sm:h-28 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
-                <img
-                  src={`${url}/images/${item.image}`}
-                  alt={item.name}
-                  className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
-                />
-                {item.discount && (
-                  <div className="absolute top-2 right-2 bg-[#55aff8] text-white px-2 py-0.5 rounded-md text-xs font-semibold">
-                    {item.discount}% OFF
-                  </div>
-                )}
-              </div>
+    <section className="admin-page">
+      <PageHeader eyebrow="YOUR RENTAL COLLECTION" title="Rental catalog" description="Manage products, rental rates, and refundable deposits." action={<Link className="admin-primary-button heading-action" to="/add"><span aria-hidden="true">＋</span> Add rental item</Link>} />
+      {error && products.length > 0 && <div className="admin-error-banner" role="status"><span>{error}</span><button type="button" onClick={() => fetchProducts(true)} disabled={refreshing}>Retry</button></div>}
 
-              <div className="flex-1 min-w-0">
-                {item.category && (
-                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                    {item.category}
-                  </p>
-                )}
-
-                <h3 className="text-lg font-semibold text-gray-800 mb-1 truncate">
-                  {item.name}
-                </h3>
-
-                {item.discription && (
-                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                    {item.discription}
-                  </p>
-                )}
-
-                <p className="text-base font-bold text-gray-900">₹{item.price}</p>
-              </div>
-
-              <div className="w-full sm:w-auto flex justify-end sm:justify-start sm:flex-col items-end sm:items-end gap-2 mt-3 sm:mt-0">
-                <button className="bg-red-500 w-full sm:w-auto hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-md transition-colors duration-300 text-sm">
-                  Remove
-                </button>
-              </div>
-            </div>
-          );
-        })}
+      <div className="catalog-toolbar">
+        <label className="catalog-search"><span aria-hidden="true">⌕</span><input type="search" value={searchInput} onChange={event => setSearchInput(event.target.value)} placeholder="Search items or categories" aria-label="Search rental catalog" /></label>
+        <label className="category-filter"><span>Category</span><select value={category} onChange={event => setCategory(event.target.value)}><option value="all">All categories</option>{categories.map(value => <option key={value} value={value}>{categoryName(value)}</option>)}</select></label>
+        <label className="category-filter sort-filter"><span>Sort</span><select value={sort} onChange={event => setSort(event.target.value)}><option value="newest">Newest</option><option value="name">Name A–Z</option><option value="price-low">Monthly rent: low to high</option><option value="price-high">Monthly rent: high to low</option></select></label>
+        <button className="admin-secondary-button refresh-button" type="button" onClick={() => fetchProducts(true)} disabled={refreshing}>{refreshing ? 'Refreshing…' : '↻ Refresh'}</button>
+        <span className="catalog-count">{filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'}</span>
       </div>
-    </div>
+
+      {loading ? <DataSkeletons cards={6} />
+        : error && !products.length ? <EmptyState icon="!" title="We couldn’t load the rental catalog" description={error} action={<button className="admin-primary-button" type="button" onClick={() => fetchProducts()}>Try again</button>} />
+        : filteredProducts.length === 0
+          ? <EmptyState icon="▦" title={products.length ? 'No matching rentals' : 'No rentals in the catalog yet'} description={products.length ? 'Try a different search or category.' : 'Use “Add rental item” to create your first listing.'} />
+          : <><div className="catalog-grid">{filteredProducts.slice(0, visibleCount).map(product => (
+            <article className="catalog-card" key={product._id}>
+              <div className={`catalog-card-image${imageReady[product._id] ? ' image-is-ready' : ''}`}><span className="catalog-image-placeholder" aria-hidden="true">▦</span><img src={`${url}/images/${product.image}`} alt={product.name} loading="lazy" width="640" height="480" onLoad={() => setImageReady(current => ({ ...current, [product._id]: true }))} onError={event => { event.currentTarget.hidden = true }} /><span className="catalog-category">{categoryName(product.category)}</span></div>
+              <div className="catalog-card-body">
+                <div className="catalog-card-title"><h2 title={product.name}>{product.name}</h2><p>{product.description || 'No item description added.'}</p></div>
+                <div className="catalog-price-row"><span><strong>₹{Number(product.monthlyRent).toLocaleString('en-IN')}</strong><small>/ month</small></span><span><strong>₹{Number(product.dailyRent).toLocaleString('en-IN')}</strong><small>/ day</small></span></div>
+                <p className="catalog-deposit">Refundable deposit <strong>₹{Number(product.securityDeposit).toLocaleString('en-IN')}</strong></p>
+                <div className="catalog-card-actions"><button className="admin-secondary-button" type="button" onClick={() => navigate(`/edit/${product._id}`)}>Edit item</button><button className="remove-button" type="button" aria-label={`Remove ${product.name}`} onClick={() => setProductToRemove(product)}>Remove</button></div>
+              </div>
+            </article>))}
+          </div>{visibleCount < filteredProducts.length && <button className="admin-secondary-button load-more-button" type="button" onClick={() => setVisibleCount(count => count + pageSize)}>Load more rentals</button>}</>}
+      {productToRemove && <Modal title="Remove this item?" description="This cannot be undone. The item will be removed from your rental catalog. Existing booking records will be kept." onClose={closeRemoveDialog}><p className="modal-item-name">{productToRemove.name}</p><div className="modal-actions"><button className="admin-secondary-button" type="button" onClick={closeRemoveDialog} disabled={removing}>Keep item</button><button className="modal-destructive-button" type="button" onClick={removeProduct} disabled={removing}>{removing ? 'Removing…' : 'Remove item'}</button></div></Modal>}
+    </section>
   )
 }
 

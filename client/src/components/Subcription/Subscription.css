@@ -12,7 +12,7 @@
     text-align: center;
 }
 
-.subscription-heading h1{
+.subscription-heading h2{
     font-size: 35px;
     font-weight: 500;
     font-family: "source serif", sans-serif;
@@ -29,31 +29,21 @@
     height: 50px;
 }
 
-.subscription-form form{
+.subscription-form{
     text-align: center;
     margin: 20px 0;
-    height: 100%;
+    min-height: 50px;
 }
 
-.subscription-form form input{
-    height: 100%;
-    width: 400px;
+.subscription-form button{
+    min-width: 170px;
+    padding: 14px 20px;
     border: 1px solid #666;
-    border-radius: 5px 0 0 5px;
-    padding-left: 20px;
-    font-size: 15px;
-    outline: none;
-}
-
-.subscription-form form button{
-    height: 100%;
-    width: 150px;
-    border: 1px solid #666;
-    border-left: none;
     background: #000;
     color: white;
     font-size: 16px;
-    border-radius: 0 5px 5px 0;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
 
@@ -62,7 +52,7 @@
 
 @media (max-width: 650px) {
 
-    .subscription-heading h1{
+    .subscription-heading h2{
         margin-bottom: 6px;
     }
 
@@ -70,13 +60,4 @@
         font-size: 10px;
     }
 
-    .subscription-form form{
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .subscription-form form input{
-        width: 200px;
-    }
 }
