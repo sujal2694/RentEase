@@ -11,7 +11,7 @@ const AddItem = lazy(() => import('./components/AddItem'))
 const OrderList = lazy(() => import('./components/OrderList'))
 const ProductsList = lazy(() => import('./components/ProductsList'))
 
-const url = (import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/$/, '')
+const url = (import.meta.env.VITE_API_URL || 'https://furniture-shop-server-y1c4.onrender.com').replace(/\/$/, '')
 
 const App = () => {
   const location = useLocation()

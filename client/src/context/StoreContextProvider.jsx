@@ -5,7 +5,7 @@ import { StoreContext } from './StoreContext';
 
 export const StoreContextProvider = ({ children }) => {
   const url = import.meta.env.VITE_API_URL || 'https://furniture-shop-server-y1c4.onrender.com';
-  const adminURL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174';
+  const adminURL = import.meta.env.VITE_ADMIN_URL || 'https://furniture-shop-admin-beta.vercel.app/';
   const [menu, setMenu] = useState('home');
   const [slider, setSlider] = useState(false);
   const [currState, setCurrState] = useState('sign up');
